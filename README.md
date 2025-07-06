@@ -48,3 +48,4 @@ Skill selection is based on a weighted priority system defined in the `SKILL_WEI
 - **`WALK_IN_CIRCLE`**: Set to `1` to enable walking in a circle in-game, or `0` to stand still.
 - **`CIRCLE_RADIUS_MULTIPLIER`**: Adjusts the size of the circle path when `WALK_IN_CIRCLE` is enabled.
 - **`SKILL_WEIGHTS`**: A dictionary where you can set the priority for each skill. Higher numbers mean higher priority.
+- **`FLOOR_LEVEL`**: I bet you can figure this one out.
