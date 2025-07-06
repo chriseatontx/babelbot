@@ -10,8 +10,6 @@
 
 This is a Python bot that automatically plays the game [Tower of Babel: Survivors of Chaos](https.store.steampowered.com/app/2665680/Tower_of_Babel_Survivors_of_Chaos/).
 
-This is a Python bot that automatically plays the game [Tower of Babel: Survivors of Chaos](https.store.steampowered.com/app/2665680/Tower_of_Babel_Survivors_of_Chaos/).
-
 ## Features
 
 - **Automated Gameplay Loop:** The bot can automatically start a run, select a floor, and enter combat.
