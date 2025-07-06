@@ -24,15 +24,22 @@ FLOOR_LEVEL = 2
 # Higher number = higher priority.
 # Skills not in this list will be treated with a priority of 0.
 SKILL_WEIGHTS = {
+    '4star':             1020,
+    'goldgain':          1010,
     'autopickkupradius': 1000,
     'expgain':           967,
+    'resurrection':      955,
+    'iceorb':            950,
     'sanctuary':         933,
+    'summonreaper':      920,
+    'purge':             910,
     'criticalhitchance': 900,
     'piercingchance':    867,
     'castspeed':         833,
     'chainlightning':    800,
     'attackspeed':       767,
     'attackpower':       733,
+    'attackarea':        710,
     'dagger':            700,
     'basicattack':       667,
     'range':             633,
@@ -41,12 +48,13 @@ SKILL_WEIGHTS = {
     'frostarrow':        533,
     'magichammer':       500,
     'fireorb':           467,
-    'iceorb':            433,
     'dragonsbreath':     400,
     'earthspike':        367,
     'lightningstrike':   333,
+    'phoenix':           320,
     'lightningwave':     300,
     'heavensjudgement':  267,
+    'spearoflight':      240,
     'blizzard':          233,
     'meteorstrike':      200,
     'duration':          167,
@@ -54,6 +62,9 @@ SKILL_WEIGHTS = {
     'curse':             100,
     'reducedamage':      67,
     'swampofthedead':    34,
+    'evade':             20,
+    '2star':             15,
+    'manarestoration':   10,
     'movementspeed':     1,
 }
 
@@ -328,7 +339,6 @@ def floor_selector_state():
     return "Floor Selector Handled"
 
 
-
 def handle_level_up_screen_state():
     """Handle the level up screen state by choosing the highest-weighted skill."""
     print("Handling level up screen state...")
@@ -370,6 +380,7 @@ def handle_level_up_screen_state():
         print(f"\n---> Best option is '{best_skill_to_choose}' with priority {highest_weight}. Clicking at {coords_to_click}.")
         
         # Call mouseclick directly with the coordinates. No need for find_and_click.
+        time.sleep(10)  # Wait a bit after clicking
         mouseclick(coords_to_click[0], coords_to_click[1])
 
     else:
@@ -382,9 +393,9 @@ def handle_level_up_screen_state():
 def handle_end_of_run_state():
     """Handle the end of run state by clicking the 'continue' button."""
     print("Handling end of run state...")
-    find_and_click('./images/endofrunokbutton.png', confidence=0.8)
+    find_and_click('./images/endofrunokbutton.png', confidence=0.7)
     wait()
-    find_and_click('./images/endofrunokbutton2.png', confidence=0.8)
+    find_and_click('./images/endofrunokbutton2.png', confidence=0.7)
 
 def handle_sell_items_state():
     """Handle the sell items state by clicking the 'sell' button."""
