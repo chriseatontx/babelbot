@@ -12,6 +12,7 @@ This is a Python bot that automatically plays the game [Tower of Babel: Survivor
 
 ## Features
 
+- **Floor Selection:** Choose which floor the bot should run on.
 - **Automated Gameplay Loop:** The bot can automatically start a run, select a floor, and enter combat.
 - **State-Based Actions:** It uses image recognition to understand the current game state (e.g., main menu, in-game, level up screen, end of run).
 - **Automatic Skill Selection:** When leveling up, the bot chooses the best skill based on a customizable priority list.

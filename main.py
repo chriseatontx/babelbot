@@ -17,6 +17,9 @@ WALK_IN_CIRCLE = 1
 # A value of 1.0 is a good starting point. Try 0.5 for a smaller circle or 2.0 for a larger one.
 CIRCLE_RADIUS_MULTIPLIER = 6.0
 
+# Set the floor level you want to run on 
+FLOOR_LEVEL = 2
+
 # --- DEFINE YOUR SKILL PRIORITIES HERE ---
 # Higher number = higher priority.
 # Skills not in this list will be treated with a priority of 0.
@@ -207,7 +210,6 @@ def determine_game_state():
 
 # =================================================================
 # Skill finder functions
-# These functions are used to find and click on specific skills.
 # =================================================================
 
 def find_all_available_skills(skill_icons_path, confidence=0.68, min_separation_distance=50):
@@ -222,23 +224,19 @@ def find_all_available_skills(skill_icons_path, confidence=0.68, min_separation_
         skill_icons_path (str): The file path to the folder containing all
                                 possible skill icon images.
         confidence (float, optional): The confidence level for image matching.
-                                      Defaults to 0.68
         min_separation_distance (int, optional): The minimum pixel distance
                                                  between two detections to be
                                                  considered separate items.
-                                                 Helps filter out duplicate
-                                                 detections of the same icon.
-                                                 Defaults to 50.
 
     Returns:
         dict: A dictionary where keys are skill names and values are a LIST
               of (x, y) center coordinates for each distinct instance found.
-              Example: {'fireball': [(950, 420)], 'reroll': [(950, 580), (950, 740)]}
     """
     found_skills = {}
     all_found_points = [] # A flat list of all points found so far to check for duplicates
 
     try:
+        # Get a list of all skill icon images from the specified folder.
         all_skill_images = [f for f in os.listdir(skill_icons_path) if f.endswith('.png')]
     except FileNotFoundError:
         print(f"Error: The directory does not exist: {skill_icons_path}")
@@ -251,36 +249,32 @@ def find_all_available_skills(skill_icons_path, confidence=0.68, min_separation_
         skill_name = os.path.splitext(image_file)[0]
 
         try:
-            # Use locateAllOnScreen to find all instances of the image.
-            # We will now correctly handle the ImageNotFoundException.
+            # Find all instances of the current skill icon on the screen.
             locations = pyautogui.locateAllOnScreen(full_path, confidence=confidence)
 
             for box in locations:
                 center_point = pyautogui.center(box)
-                # Convert to a simple tuple of ints
                 current_point = (int(center_point.x), int(center_point.y))
 
                 # --- DUPLICATE CHECKING LOGIC ---
-                # Check if this point is too close to any point we've already logged
+                # Check if this point is too close to any point we've already logged.
                 is_duplicate = False
                 for existing_point in all_found_points:
                     if is_too_close(current_point, existing_point, min_separation_distance):
                         is_duplicate = True
-                        break # Found a duplicate, no need to check further
+                        break
 
                 if not is_duplicate:
-                    # This is a new, unique skill location
+                    # If it's a new, unique skill location, add it to our list.
                     if skill_name not in found_skills:
                         found_skills[skill_name] = []
                     
                     found_skills[skill_name].append(current_point)
-                    all_found_points.append(current_point) # Add to our master list of points
+                    all_found_points.append(current_point)
                     print(f"  [+] Found unique '{skill_name}' at coordinates: {current_point}")
 
         except pyautogui.ImageNotFoundException:
-            # This is expected behavior when a skill icon is not on screen.
-            # We can uncomment the line below for very verbose debugging.
-            # print(f"  [-] '{skill_name}' not found on screen.")
+            # This is expected if a skill icon is not on screen.
             continue
         except Exception as e:
             print(f"An unexpected error occurred while searching for {image_file}: {e}")
@@ -295,17 +289,18 @@ def find_all_available_skills(skill_icons_path, confidence=0.68, min_separation_
 
 # =================================================================
 # STATE HANDLER FUNCTIONS
-# Each function handles one state and returns the outcome.
+# Each function handles a specific game state.
 # =================================================================
 
 def handle_lobby_screen_state():
-    """Handle the lobby screen state by clicking the 'select floor' button."""
+    """Handles the lobby screen by moving the character to the elevator and entering the floor selection."""
     print("Handling lobby screen state...")
-    # move up to the elevator
+    # Move up to the elevator.
     keyboard.press('w')
     time.sleep(3)
     keyboard.release('w')
     wait()
+    # Press 'e' to interact with the elevator.
     keyboard.press_and_release('e')
     wait()
     
@@ -313,9 +308,16 @@ def floor_selector_state():
     # Move down to floor 1
     for i in range(1, 10):
         print(f"Moving selector down to floor 1 {i}...")
-        mouseclick(1379, 492)
-        wait()
+        find_and_click('./images/elevatordown.png', confidence=0.9)
+        time.sleep(0.5)  # Wait a bit before the next click
     
+    if FLOOR_LEVEL > 1:
+        # Move up to the desired floor level
+        for i in range(1, FLOOR_LEVEL):
+            print(f"Moving selector up to floor {i + 1}...")
+            find_and_click('./images/elevatorup.png', confidence=0.9)
+            time.sleep(0.5)
+
     #click the Battle Button
     print(f"Clicking the Battle Button...")
     wait()
