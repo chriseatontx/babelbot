@@ -5,9 +5,7 @@ This document outlines the planned features and ongoing work for the Babelbot pr
 ## Planned Features
 
 *   [ ] Add a graphical user interface (GUI) for easier configuration.
-*   [ ] Implement a more advanced combat logic to handle different enemy types.
-*   [ ] Add support for multiple characters.
-*   [ ] Implement a system for automatically updating skill priorities based on game progress.
+*   [ ] Implement a more advanced logic system to handle smart movement.
 
 ## Work in Progress
 
