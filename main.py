@@ -56,11 +56,11 @@ SKILL_WEIGHTS = {
 
 
 def wait():
-    """Wait for x seconds."""
+    """Wait for a short duration to prevent overwhelming the game with inputs."""
     time.sleep(0.1)
 
 def focus_game_window():
-    """Focus the game window."""
+    """Brings the 'Tower of Babel' game window to the foreground."""
     try:
         # Find the game window by its title
         game_window = pygetwindow.getWindowsWithTitle('Tower of Babel')[0]
@@ -70,7 +70,7 @@ def focus_game_window():
         print("Game window not found. Please ensure the game is running and the title is correct.")
 
 def mouseclick(x,y):
-    """Move mouse to (x, y) and click."""
+    """Moves the mouse to the specified coordinates (x, y) and performs a left click."""
     print(f"Moving mouse to ({x}, {y}) and clicking left mouse button")
     wait()
     pyautogui.moveTo(x, y, duration=0.5)
@@ -78,19 +78,20 @@ def mouseclick(x,y):
     pyautogui.click() 
 
 def release_all_keys():
+    """Releases all movement and action keys to prevent them from getting stuck."""
     keys = ['w', 'a', 's', 'd', 'e', 'space', 'shift', 'ctrl']
     for key in keys:
         print(f"Releasing key: {key}")
         pyautogui.keyUp(key)
 
 def on_key_press(event):
-    """Handle key press events."""
+    """Handles global key press events, specifically for stopping the bot."""
     print(f"Key pressed: {event.name}")
     if event.name == 'ctrl' and keyboard.is_pressed('c'):
         print("Ctrl+C detected. Exiting bot.")
         raise KeyboardInterrupt  # Raise an exception to stop the bot
 
-#Set up the hook. The on_key_press function will be called whenever a key is pressed.
+# Set up a global key press hook to listen for the exit command.
 keyboard.on_press(on_key_press)
 
 def find_and_click(image_filename, confidence=0.7):
@@ -106,21 +107,17 @@ def find_and_click(image_filename, confidence=0.7):
         bool: True if the image was found and clicked, False otherwise.
     """
     try:
-        # 1. Locate the center of the image on the screen.
-        # This is better than locateOnScreen() because it directly gives us the center point.
+        # Locate the center of the image on the screen.
         location = pyautogui.locateCenterOnScreen(image_filename, confidence=confidence)
 
-        # 2. Check if the image was found.
+        # If the image is found, click on its location.
         if location:
             print(f"Found '{image_filename}' at {location}.")
-            
-            # 3. If found, call the click function with the coordinates.
-            # The 'location' variable is already a Point(x, y) object.
             mouseclick(location.x, location.y)
-            return True # Signal that we succeeded
+            return True
         else:
             print(f"Could not find '{image_filename}' on the screen.")
-            return False # Signal that we failed
+            return False
 
     except pyautogui.PyAutoGUIException as e:
         # This error usually means the image file itself could not be found on your disk.
@@ -151,7 +148,6 @@ def walk_in_a_circle(radius_multiplier=1.0):
     path_keys = ['w', 'a', 's', 'd']
     
     # A base duration for each side of the square path.
-    # Adjust this if the character moves too fast or slow for one segment.
     base_duration = 0.5  # seconds
     
     # Calculate the actual time to hold each key down
@@ -163,9 +159,9 @@ def walk_in_a_circle(radius_multiplier=1.0):
     print(f"--- Walking segment {walk_in_a_circle.step + 1}/4: Pressing '{current_key}' for {side_duration:.2f}s ---")
     
     # Press, wait, and release the key for one segment of the circle
-    keyboard.press(current_key)  # Use keyboard module for better control
+    keyboard.press(current_key)
     time.sleep(side_duration)
-    keyboard.release(current_key)  # Release the key
+    keyboard.release(current_key)
 
     # A brief pause between key presses can make movement feel less jerky
     time.sleep(0.1)
