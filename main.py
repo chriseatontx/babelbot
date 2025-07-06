@@ -2,6 +2,7 @@ import time
 import pyautogui
 import tkinter
 import pygetwindow
+import keyboard
 
 
 def wait():
@@ -124,7 +125,24 @@ def floor_selector_state():
         print(f"Could not click the Battle Button: {e}")
     return "Floor Selector Handled"
 
+def handle_lobby_screen_state():
+    """Handle the lobby screen state."""
+    print("Handling lobby screen state...")
+    # Simulate key press 'w'
+    print("Pressing 'w' key")
+    wait()
+    pyautogui.keyDown('w')
+    time.sleep(3)  # Hold the key down for 3sec duration
+    pyautogui.keyUp('w')
+    print("Should be standing in elevator now...")
+    pyautogui.keyDown('e')
+    wait()
+    pyautogui.keyUp('e')
 
+
+# =================================================================
+# Main bot loop
+# =================================================================
     
      
 
@@ -139,27 +157,35 @@ def run_state_machine_bot():
     focus_game_window()
     wait()
 
-    # Determine the game state
-    print("Determining game state...")
-    game_state = determine_game_state()
-    print(f"Game state: {game_state}") 
-    wait()
 
-    # Perform actions based on the game state
-    match game_state:
-        case "Start Screen":
-              print("Game is at the Start Screen. Performing actions...")
-        case "Lobby Screen":
-              print("Game is at the Lobby Screen. Performing actions...")
-        case "Lobby Pause":
-              print("Game is at the Lobby Pause Screen. Performing actions...")
-        case "Select Floor":
-              print("Game is at the Select Floor screen. Performing actions...")
-              wait()
-              print("Running floor selector state")
-              wait()
-              floor_selector_state()
+    while True:
+        # Determine the game state
+        print("Determining game state...")
+        game_state = determine_game_state()
+        print(f"Game state: {game_state}") 
+        wait()
 
+        # Perform actions based on the game state
+        match game_state:
+            case "Start Screen":
+                print("Game is at the Start Screen. Clicking Play...")
+                find_and_click('./images/play.png', confidence=0.8)
+            case "Lobby Screen":
+                print("Game is at the Lobby Screen. Moving to Select floor...")
+                handle_lobby_screen_state()
+            case "Lobby Pause":
+                print("Game is at the Lobby Pause Screen. Clicking Resume...")
+                find_and_click('./images/lobbypause.png', confidence=0.8)
+            case "Select Floor":
+                print("Game is at the Select Floor screen. Performing actions...")
+                wait()
+                print("Running floor selector state")
+                wait()
+                floor_selector_state()
+
+        if keyboard.is_pressed('ctrl') and keyboard.is_pressed('c'):
+            print("ctrl-c detected. Exiting bot.")
+            break 
 
 
 
