@@ -15,7 +15,7 @@ WALK_IN_CIRCLE = 1
 # Determines the size of the circle. Larger number = larger circle path.
 # This value acts as a multiplier for how long each direction key (W,A,S,D) is held.
 # A value of 1.0 is a good starting point. Try 0.5 for a smaller circle or 2.0 for a larger one.
-CIRCLE_RADIUS_MULTIPLIER = 6.0
+CIRCLE_RADIUS_MULTIPLIER = 24
 
 # Set the floor level you want to run on 
 FLOOR_LEVEL = 2
@@ -24,15 +24,21 @@ FLOOR_LEVEL = 2
 # Higher number = higher priority.
 # Skills not in this list will be treated with a priority of 0.
 SKILL_WEIGHTS = {
-    '4star':             1020,
+
+    'iceorb':            1020,
+    'expgain':           967,
     'goldgain':          1010,
     'autopickkupradius': 1000,
-    'expgain':           967,
+    'liferegeneration':  960,
     'resurrection':      955,
-    'iceorb':            950,
+    'swampofthedead':    940,
+    'frostarrow':        935,
+    'blizzard':          934,
     'sanctuary':         933,
+    'spiningblade':      934,
     'summonreaper':      920,
     'purge':             910,
+    'corpseexplosion':   905,
     'criticalhitchance': 900,
     'piercingchance':    867,
     'castspeed':         833,
@@ -45,7 +51,6 @@ SKILL_WEIGHTS = {
     'range':             633,
     'projectilecount':   600,
     'specialattack':     567,
-    'frostarrow':        533,
     'magichammer':       500,
     'fireorb':           467,
     'dragonsbreath':     400,
@@ -55,14 +60,15 @@ SKILL_WEIGHTS = {
     'lightningwave':     300,
     'heavensjudgement':  267,
     'spearoflight':      240,
-    'blizzard':          233,
     'meteorstrike':      200,
     'duration':          167,
     'magicitemfindchance': 133,
+    'criticalhitdamage': 120,
+    'balllightning':    110,
     'curse':             100,
     'reducedamage':      67,
-    'swampofthedead':    34,
     'evade':             20,
+    '4star':             17,
     '2star':             15,
     'manarestoration':   10,
     'movementspeed':     1,
@@ -162,7 +168,7 @@ def walk_in_a_circle(radius_multiplier=1.0):
     path_keys = ['w', 'a', 's', 'd']
     
     # A base duration for each side of the square path.
-    base_duration = 0.5  # seconds
+    base_duration = 0.1  # seconds
     
     # Calculate the actual time to hold each key down
     side_duration = base_duration * radius_multiplier
@@ -223,7 +229,7 @@ def determine_game_state():
 # Skill finder functions
 # =================================================================
 
-def find_all_available_skills(skill_icons_path, confidence=0.68, min_separation_distance=50):
+def find_all_available_skills(skill_icons_path, confidence=0.8, min_separation_distance=50):
     """
     Scans the screen to identify ALL DISTINCT skill choices currently presented.
 
@@ -254,6 +260,8 @@ def find_all_available_skills(skill_icons_path, confidence=0.68, min_separation_
         return {}
 
     print("Starting screen search for all available skills...")
+    #set the mouse cursor where it will not highlight any skills.
+    mouseclick(792,69)
 
     for image_file in all_skill_images:
         full_path = os.path.join(skill_icons_path, image_file)
@@ -261,7 +269,7 @@ def find_all_available_skills(skill_icons_path, confidence=0.68, min_separation_
 
         try:
             # Find all instances of the current skill icon on the screen.
-            locations = pyautogui.locateAllOnScreen(full_path, confidence=confidence)
+            locations = pyautogui.locateAllOnScreen(full_path, confidence=confidence, grayscale=True)
 
             for box in locations:
                 center_point = pyautogui.center(box)
@@ -288,7 +296,8 @@ def find_all_available_skills(skill_icons_path, confidence=0.68, min_separation_
             # This is expected if a skill icon is not on screen.
             continue
         except Exception as e:
-            print(f"An unexpected error occurred while searching for {image_file}: {e}")
+            #print(f"An unexpected error occurred while searching for {image_file}: {e}")
+            continue
 
     total_found = sum(len(coords) for coords in found_skills.values())
     if total_found == 0:
@@ -306,6 +315,8 @@ def find_all_available_skills(skill_icons_path, confidence=0.68, min_separation_
 def handle_lobby_screen_state():
     """Handles the lobby screen by moving the character to the elevator and entering the floor selection."""
     print("Handling lobby screen state...")
+    print("Waiting 10 seconds for user to cancel the script...")
+    time.sleep(10)
     # Move up to the elevator.
     keyboard.press('w')
     time.sleep(3)
@@ -318,6 +329,10 @@ def handle_lobby_screen_state():
 def floor_selector_state():
     # Move down to floor 1
     for i in range(1, 10):
+
+        print(f"Moving cursor to not interfere witm image detection...")
+        #set the mouse cursor where it will not highlight any skills.
+        find_and_click('./images/elevatortop.png', confidence=0.9)
         print(f"Moving selector down to floor 1 {i}...")
         find_and_click('./images/elevatordown.png', confidence=0.9)
         time.sleep(0.5)  # Wait a bit before the next click
@@ -325,6 +340,9 @@ def floor_selector_state():
     if FLOOR_LEVEL > 1:
         # Move up to the desired floor level
         for i in range(1, FLOOR_LEVEL):
+            print(f"Moving cursor to not interfere witm image detection...")
+            #set the mouse cursor where it will not highlight any skills.
+            find_and_click('./images/elevatortop.png', confidence=0.9)
             print(f"Moving selector up to floor {i + 1}...")
             find_and_click('./images/elevatorup.png', confidence=0.9)
             time.sleep(0.5)
@@ -345,7 +363,7 @@ def handle_level_up_screen_state():
 
     available_skills = find_all_available_skills(
         SKILL_ICON_FOLDER, 
-        confidence=0.68, 
+        confidence=0.88, 
         min_separation_distance=50
     )
 
@@ -380,7 +398,7 @@ def handle_level_up_screen_state():
         print(f"\n---> Best option is '{best_skill_to_choose}' with priority {highest_weight}. Clicking at {coords_to_click}.")
         
         # Call mouseclick directly with the coordinates. No need for find_and_click.
-        time.sleep(10)  # Wait a bit after clicking
+        time.sleep(1)  # Wait a bit after clicking
         mouseclick(coords_to_click[0], coords_to_click[1])
 
     else:
@@ -455,38 +473,15 @@ def run_state_machine_bot():
                 handle_sell_items_state()
             case "In Game":
                 print("Game is in progress.")
-                time.sleep(1)
+                wait()
                 if WALK_IN_CIRCLE == 1:
                     # Call the function to perform one step of the walk cycle
                     walk_in_a_circle(CIRCLE_RADIUS_MULTIPLIER)
                 else:
                     # If walking is disabled, just wait before checking again.
                     print("Walking in circle is disabled. Standing still...")
-                    time.sleep(1)
-                wait()
+                    wait()
 
-
-
-
-    # Simulate key press 'a'
-    #print("Pressing 'a' key")
-    #wait()
-    #pyautogui.keyDown('a')
-    #wait()
-    #pyautogui.keyUp('a')
-
-    # Simulate key press 'enter'
-    #print("Pressing 'enter' key")
-    #wait()
-    #pyautogui.press('enter')
-
-    #1727 Y: 427
-    # Move mouse to (100, 100) and click
-    #print("Moving mouse to (1727, 427) and clicking left mouse button")
-    #wait()
-    #pyautogui.moveTo(1727, 427, duration=0.5)
-    #wait()
-    #pyautogui.click()
 
 # --- Start the bot ---
 if __name__ == "__main__":
